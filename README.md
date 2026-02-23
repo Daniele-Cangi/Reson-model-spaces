@@ -5,6 +5,7 @@ colorFrom: blue
 colorTo: green
 sdk: gradio
 sdk_version: 4.44.0
+python_version: 3.10
 app_file: app.py
 pinned: false
 ---
@@ -48,6 +49,10 @@ Apri: `http://localhost:7860`
 - (alternativa) `HUGGINGFACEHUB_API_TOKEN` oppure `HF_API_TOKEN`
 - opzionali: `MODEL_REPO`, `MODEL_TYPE`, `BASE_MODEL_NAME`
 4. Riavvia lo Space.
+
+Nota runtime:
+- questo Space e configurato per `python_version: 3.10` (compatibilita con dipendenze Gradio/Audio)
+- evitare Python 3.13 su questo progetto
 
 ## Flusso GitHub -> Spaces (si, e possibile)
 

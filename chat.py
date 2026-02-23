@@ -45,6 +45,23 @@ def _env_bool(name: str, default: bool) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _resolve_hf_token() -> str | None:
+    # Supporta i nomi piu comuni usati in Spaces/SDK.
+    for env_name in ("HF_TOKEN", "HUGGINGFACEHUB_API_TOKEN", "HF_API_TOKEN"):
+        value = os.getenv(env_name, "").strip()
+        if value:
+            return value
+    return None
+
+
+def _gated_repo_help_message(base_model_name: str) -> str:
+    return (
+        "Accesso negato al base model gated. "
+        f"Configura un Secret nello Space (HF_TOKEN) con accesso a {base_model_name} "
+        "e accetta la licenza del modello con lo stesso account Hugging Face."
+    )
+
+
 def _get_dtype() -> torch.dtype:
     value = os.getenv("TORCH_DTYPE", "float16").strip().lower()
     if value == "bfloat16":
@@ -66,12 +83,15 @@ def load_reson_model():
     model_repo = os.getenv("MODEL_REPO", "Nexus-Walker/Reson").strip()
     model_type = os.getenv("MODEL_TYPE", "peft").strip().lower()
     base_model_name = os.getenv("BASE_MODEL_NAME", "meta-llama/Llama-2-7b-chat-hf").strip()
-    hf_token = os.getenv("HF_TOKEN", "").strip() or None
+    hf_token = _resolve_hf_token()
     torch_dtype = _get_dtype()
     load_in_4bit = _env_bool("LOAD_IN_4BIT", True)
 
     if model_type not in {"peft", "full"}:
         raise ValueError("MODEL_TYPE deve essere 'peft' o 'full'.")
+
+    if model_type == "peft" and "meta-llama/Llama-2-7b-chat-hf" in base_model_name and not hf_token:
+        raise ValueError(_gated_repo_help_message(base_model_name))
 
     print(f"Caricamento modello da Hugging Face: {model_repo} (type={model_type})")
 
@@ -89,11 +109,16 @@ def load_reson_model():
         )
 
     tokenizer_repo = base_model_name if model_type == "peft" else model_repo
-    tokenizer = AutoTokenizer.from_pretrained(
-        tokenizer_repo,
-        token=hf_token,
-        trust_remote_code=True,
-    )
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(
+            tokenizer_repo,
+            token=hf_token,
+            trust_remote_code=True,
+        )
+    except Exception as exc:
+        if "gated repo" in str(exc).lower() or "401" in str(exc):
+            raise RuntimeError(_gated_repo_help_message(base_model_name)) from exc
+        raise
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -109,10 +134,20 @@ def load_reson_model():
         model_kwargs["quantization_config"] = quantization_config
 
     if model_type == "peft":
-        base_model = AutoModelForCausalLM.from_pretrained(base_model_name, **model_kwargs)
-        model = PeftModel.from_pretrained(base_model, model_repo, token=hf_token)
+        try:
+            base_model = AutoModelForCausalLM.from_pretrained(base_model_name, **model_kwargs)
+            model = PeftModel.from_pretrained(base_model, model_repo, token=hf_token)
+        except Exception as exc:
+            if "gated repo" in str(exc).lower() or "401" in str(exc):
+                raise RuntimeError(_gated_repo_help_message(base_model_name)) from exc
+            raise
     else:
-        model = AutoModelForCausalLM.from_pretrained(model_repo, **model_kwargs)
+        try:
+            model = AutoModelForCausalLM.from_pretrained(model_repo, **model_kwargs)
+        except Exception as exc:
+            if "gated repo" in str(exc).lower() or "401" in str(exc):
+                raise RuntimeError(_gated_repo_help_message(model_repo)) from exc
+            raise
 
     model.eval()
     print("Modello caricato correttamente.")

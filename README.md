@@ -45,6 +45,7 @@ Apri: `http://localhost:7860`
 2. Carica questi file nello Space (`app.py`, `chat.py`, `requirements.txt`, `README.md`).
 3. In `Settings -> Variables and secrets` aggiungi:
 - `HF_TOKEN` come Secret
+- (alternativa) `HUGGINGFACEHUB_API_TOKEN` oppure `HF_API_TOKEN`
 - opzionali: `MODEL_REPO`, `MODEL_TYPE`, `BASE_MODEL_NAME`
 4. Riavvia lo Space.
 

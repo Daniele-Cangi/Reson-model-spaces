@@ -26,6 +26,17 @@ warnings.filterwarnings("ignore", category=UserWarning)
 MODEL = None
 TOKENIZER = None
 
+try:
+    import spaces  # Hugging Face ZeroGPU runtime
+except Exception:
+    spaces = None
+
+
+def _gpu_decorator(func):
+    if spaces is None:
+        return func
+    return spaces.GPU(func)
+
 
 def _env_bool(name: str, default: bool) -> bool:
     value = os.getenv(name)
@@ -209,6 +220,7 @@ def get_model_and_tokenizer():
     return MODEL, TOKENIZER
 
 
+@_gpu_decorator
 def chat_fn(message, history):
     if not message or not message.strip():
         return "Scrivi una domanda."

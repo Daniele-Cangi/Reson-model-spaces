@@ -273,6 +273,7 @@ def build_app() -> gr.ChatInterface:
     return gr.ChatInterface(
         fn=chat_fn,
         type="messages",
+        cache_examples=False,
         title="RESON Chat",
         description=(
             "Chat con modello fine-tuned su Hugging Face. "

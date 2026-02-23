@@ -54,11 +54,11 @@ Puoi usare una repo GitHub come sorgente e pushare lo stesso branch anche su Hug
 
 1. Crea:
 - repo GitHub (es: `Nexus-Walker/reson-gradio`)
-- Space HF (es: `Nexus-Walker/reson-chat`)
+- Space HF (es: `Nexus-Walker/Reson-model`)
 2. Esegui:
 
 ```powershell
-.\publish_remotes.ps1 -GitHubRepo "Nexus-Walker/reson-gradio" -HfSpaceRepo "Nexus-Walker/reson-chat"
+.\publish_remotes.ps1 -GitHubRepo "Daniele-Cangi/Reson-model-spaces" -HfSpaceRepo "Nexus-Walker/Reson-model"
 ```
 
 Questo script:
@@ -74,7 +74,7 @@ Configura in GitHub:
 1. `Settings -> Secrets and variables -> Actions -> Secrets`
 - `HF_TOKEN` = token Hugging Face (fine-grained, read/write)
 2. `Settings -> Secrets and variables -> Actions -> Variables`
-- `HF_SPACE_REPO` = `Nexus-Walker/nome-space`
+- `HF_SPACE_REPO` = `Nexus-Walker/Reson-model`
 
 Dopo questo, ogni push su `main` fa deploy automatico allo Space.
 

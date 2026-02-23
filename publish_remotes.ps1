@@ -1,8 +1,8 @@
 param(
     [Parameter(Mandatory = $true)]
-    [string]$GitHubRepo,   # es: Nexus-Walker/reson-gradio
+    [string]$GitHubRepo,   # es: Daniele-Cangi/Reson-model-spaces
     [Parameter(Mandatory = $true)]
-    [string]$HfSpaceRepo   # es: Nexus-Walker/reson-chat
+    [string]$HfSpaceRepo   # es: Nexus-Walker/Reson-model
 )
 
 $ErrorActionPreference = "Stop"

@@ -22,16 +22,14 @@ jobs:
 
       - name: Push to Hugging Face Space
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_SPACE_REPO: ${{ vars.HF_SPACE_REPO }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN || secrets.HUGGINGFACEHUB_API_TOKEN || secrets.HF_API_TOKEN }}
+          HF_SPACE_REPO: ${{ vars.HF_SPACE_REPO || 'Nexus-Walker/Reson-model' }}
         run: |
+          set -e
           if [ -z "$HF_TOKEN" ]; then
-            echo "Missing secret HF_TOKEN"
+            echo "::error::Missing Hugging Face token secret. Set HF_TOKEN (or HUGGINGFACEHUB_API_TOKEN / HF_API_TOKEN)."
             exit 1
           fi
-          if [ -z "$HF_SPACE_REPO" ]; then
-            echo "Missing repo variable HF_SPACE_REPO (e.g. Nexus-Walker/Reson-model)"
-            exit 1
-          fi
+          echo "Sync target Space: $HF_SPACE_REPO"
           git remote add hfspace "https://oauth2:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE_REPO}"
           git push hfspace HEAD:main --force

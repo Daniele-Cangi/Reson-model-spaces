@@ -5,3 +5,4 @@ peft>=0.10.0
 accelerate>=0.28.0
 bitsandbytes>=0.43.0
 safetensors>=0.4.0
+huggingface_hub<1.0
